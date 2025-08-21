@@ -1,1 +1,1 @@
-<img src="./screenshoots/schwab.png" alt="Logo" width="200"/>
+<img src="./screenshoots/schwab.png" alt="Logo" width="600"/>

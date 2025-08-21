@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schwab Pro Trading Dashboard</title>
+    <!-- css -->
+      <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+ 
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span>📈</span>
+                <span>Schwab Pro</span>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-link active" onclick="showPage('dashboard')">Dashboard</li>
+                <li class="nav-link" onclick="showPage('account-details')">Account</li>
+                <li class="nav-link" onclick="showPage('market-details')">Markets</li>
+                <li class="nav-link" onclick="showPage('trading-details')">Trading</li>
+                <li class="nav-link" onclick="showPage('analysis-details')">Analysis</li>
+                <li class="nav-link" onclick="showPage('portfolio-details')">Portfolio</li>
+            </ul>
+        </div>
+    </nav>
+
+   
+    <div class="page active" id="dashboard">
+        <div class="container">
+            <div class="header">
+                <div class="header-content">
+                    <h1>🏦 Schwab Pro Trading</h1>
+                    <p>Advanced Trading Platform with Real-time Market Data & Analytics</p>
+                </div>
+            </div>
+
+            
+            <div class="card glow-effect">
+                <div class="card-header">
+                    <h3><span class="card-icon">🔐</span>API Connection</h3>
+                    <span class="status-indicator" id="connectionStatus"></span>
+                </div>
+                <form id="authForm">
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="appKey">App Key</label>
+                            <input type="text" id="appKey" placeholder="Enter your Schwab App Key" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appSecret">App Secret</label>
+                            <input type="password" id="appSecret" placeholder="Enter your App Secret" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">🚀 Connect to Schwab API</button>
+                    <button type="button" class="btn btn-warning" onclick="loadDemoData()">📊 Load Demo Data</button>
+                </form>
+                <div id="authMessage"></div>
+            </div>
+
+            <div class="grid">
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3><span class="card-icon">💼</span>Account Summary</h3>
+                        <button class="view-details-btn" onclick="showPage('account-details')">View Details</button>
+                    </div>
+                    <button class="btn btn-secondary" onclick="getAccountInfo()">📊 Refresh Account</button>
+                    <div id="accountDisplay" class="data-display">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Connect to API to view account information
+                        </div>
+                    </div>
+                </div>
+
+               
+                <div class="card">
+                    <div class="card-header">
+                        <h3><span class="card-icon">📈</span>Market Watchlist</h3>
+                        <button class="view-details-btn" onclick="showPage('market-details')">View Details</button>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="symbolInput" placeholder="Enter symbol (e.g., AAPL, TSLA)" value="AAPL">
+                        <button class="btn" onclick="getQuote()" style="margin-top: 10px;">💹 Get Quote</button>
+                        <button class="btn" onclick="getMultipleQuotes()" style="margin-top: 10px;">📊 Get Watchlist</button>
+                    </div>
+                    <div id="quoteDisplay"></div>
+                </div>
+
+               
+                <div class="card">
+                    <div class="card-header">
+                        <h3><span class="card-icon">⚡</span>Quick Trade</h3>
+                        <button class="view-details-btn" onclick="showPage('trading-details')">Advanced Trading</button>
+                    </div>
+                    <form id="tradeForm" class="trade-form">
+                        <div class="form-group">
+                            <label for="tradeSymbol">Symbol</label>
+                            <input type="text" id="tradeSymbol" placeholder="AAPL" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tradeAction">Action</label>
+                            <select id="tradeAction" required>
+                                <option value="BUY">Buy</option>
+                                <option value="SELL">Sell</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tradeQuantity">Quantity</label>
+                            <input type="number" id="tradeQuantity" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tradeType">Order Type</label>
+                            <select id="tradeType" required>
+                                <option value="MARKET">Market</option>
+                                <option value="LIMIT">Limit</option>
+                            </select>
+                        </div>
+                        <div class="full-width">
+                            <button type="submit" class="btn btn-success">🚀 Place Order</button>
+                            <button type="button" class="btn" onclick="previewOrder()">👁️ Preview Order</button>
+                        </div>
+                    </form>
+                    <div id="tradeMessage"></div>
+                </div>
+
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3><span class="card-icon">📋</span>Recent Activity</h3>
+                        <button class="view-details-btn" onclick="showPage('portfolio-details')">Full History</button>
+                    </div>
+                    <button class="btn" onclick="getOrderHistory()">🔄 Refresh Orders</button>
+                    <div id="orderDisplay" class="data-display">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Click refresh to load recent activity
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+    <div class="page" id="account-details">
+        <div class="container">
+            <div class="detail-header">
+                <h1>💼 Account Details</h1>
+                <button class="btn back-btn" onclick="showPage('dashboard')">← Back to Dashboard</button>
+            </div>
+            
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Account Overview</h3>
+                    <div id="detailedAccountInfo" class="data-display">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading detailed account information...
+                        </div>
+                    </div>
+                    <button class="btn" onclick="loadDetailedAccountInfo()" style="margin-top: 15px;">Load Full Data</button>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Performance Metrics</h3>
+                    <div id="performanceMetrics" class="data-display">
+                        Performance charts and metrics will be displayed here
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Risk Analysis</h3>
+                    <div id="riskAnalysis" class="data-display">
+                        Risk metrics and portfolio analysis
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+    <div class="page" id="market-details">
+        <div class="container">
+            <div class="detail-header">
+                <h1>📈 Market Center</h1>
+                <button class="btn back-btn" onclick="showPage('dashboard')">← Back to Dashboard</button>
+            </div>
+            
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Market Overview</h3>
+                    <div id="marketOverview" class="data-display">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading market data...
+                        </div>
+                    </div>
+                    <button class="btn" onclick="loadMarketOverview()" style="margin-top: 15px;">Refresh Market Data</button>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Sector Performance</h3>
+                    <div id="sectorPerformance">
+                        <table class="detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Sector</th>
+                                    <th>Change</th>
+                                    <th>Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sectorTableBody">
+                                <tr><td colspan="3">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Top Movers</h3>
+                    <div id="topMovers">
+                        <table class="detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Price</th>
+                                    <th>Change %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="moversTableBody">
+                                <tr><td colspan="3">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  
+    <div class="page" id="trading-details">
+        <div class="container">
+            <div class="detail-header">
+                <h1>⚡ Advanced Trading</h1>
+                <button class="btn back-btn" onclick="showPage('dashboard')">← Back to Dashboard</button>
+            </div>
+            
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Advanced Order Entry</h3>
+                    <form id="advancedTradeForm">
+                        <div class="grid">
+                            <div class="form-group">
+                                <label for="advSymbol">Symbol</label>
+                                <input type="text" id="advSymbol" placeholder="AAPL" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="advAction">Action</label>
+                                <select id="advAction" required>
+                                    <option value="BUY">Buy</option>
+                                    <option value="SELL">Sell</option>
+                                    <option value="BUY_TO_OPEN">Buy to Open</option>
+                                    <option value="SELL_TO_CLOSE">Sell to Close</option>
+                                    <option value="SELL_SHORT">Sell Short</option>
+                                    <option value="BUY_TO_COVER">Buy to Cover</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="advQuantity">Quantity</label>
+                                <input type="number" id="advQuantity" min="1" value="100" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="advOrderType">Order Type</label>
+                                <select id="advOrderType" required>
+                                    <option value="MARKET">Market</option>
+                                    <option value="LIMIT">Limit</option>
+                                    <option value="STOP">Stop</option>
+                                    <option value="STOP_LIMIT">Stop Limit</option>
+                                    <option value="TRAILING_STOP">Trailing Stop</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="advPrice">Price</label>
+                                <input type="number" id="advPrice" step="0.01" placeholder="Enter price">
+                            </div>
+                            <div class="form-group">
+                                <label for="advDuration">Duration</label>
+                                <select id="advDuration">
+                                    <option value="DAY">Day</option>
+                                    <option value="GTC">Good Till Canceled</option>
+                                    <option value="IOC">Immediate or Cancel</option>
+                                    <option value="FOK">Fill or Kill</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success full-width">🚀 Place Advanced Order</button>
+                    </form>
+                    <div id="advancedTradeMessage"></div>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Options Trading</h3>
+                    <div class="form-group">
+                        <input type="text" id="optionsSymbol" placeholder="Underlying symbol" value="AAPL">
+                        <input type="date" id="optionsExpiry" required style="margin-top: 10px;">
+                        <button class="btn" onclick="getOptionsChain()" style="margin-top: 10px;">⚡ Get Options Chain</button>
+                    </div>
+                    <div id="optionsDisplay" class="data-display"></div>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Order Management</h3>
+                    <button class="btn" onclick="loadActiveOrders()">📋 Load Active Orders</button>
+                    <button class="btn btn-warning" onclick="cancelAllOrders()">❌ Cancel All</button>
+                    <div id="activeOrdersDisplay" class="data-display">
+                        Click "Load Active Orders" to view pending orders
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="page" id="analysis-details">
+        <div class="container">
+            <div class="detail-header">
+                <h1>📊 Market Analysis</h1>
+                <button class="btn back-btn" onclick="showPage('dashboard')">← Back to Dashboard</button>
+            </div>
+            
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Technical Analysis</h3>
+                    <div class="form-group">
+                        <input type="text" id="analysisSymbol" placeholder="Symbol for analysis" value="SPY">
+                        <select id="analysisPeriod" style="margin-top: 10px;">
+                            <option value="1day">1 Day</option>
+                            <option value="5day">5 Days</option>
+                            <option value="1month">1 Month</option>
+                            <option value="3month">3 Months</option>
+                            <option value="6month">6 Months</option>
+                            <option value="1year">1 Year</option>
+                        </select>
+                        <button class="btn" onclick="getMarketData()" style="margin-top: 10px;">📈 Generate Analysis</button>
+                    </div>
+                    <div id="chartDisplay" class="data-display"></div>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Economic Indicators</h3>
+                    <div id="economicIndicators">
+                        <table class="detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Indicator</th>
+                                    <th>Current</th>
+                                    <th>Previous</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody id="indicatorsTableBody">
+                                <tr><td colspan="4">Loading economic data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn" onclick="loadEconomicIndicators()" style="margin-top: 15px;">🔄 Refresh Data</button>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Market Sentiment</h3>
+                    <div id="marketSentiment" class="data-display">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-value" id="fearGreedIndex">--</span>
+                                <div class="stat-label">Fear & Greed Index</div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-value" id="vixLevel">--</span>
+                                <div class="stat-label">VIX Level</div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-value" id="putCallRatio">--</span>
+                                <div class="stat-label">Put/Call Ratio</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="loadMarketSentiment()" style="margin-top: 15px;">📊 Load Sentiment Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="portfolio-details">
+        <div class="container">
+            <div class="detail-header">
+                <h1>💼 Portfolio Management</h1>
+                <button class="btn back-btn" onclick="showPage('dashboard')">← Back to Dashboard</button>
+            </div>
+            
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <h3>Holdings Detail</h3>
+                    <button class="btn" onclick="getPositions()">📊 Refresh Positions</button>
+                    <div id="detailedPositions">
+                        <table class="detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Shares</th>
+                                    <th>Avg Cost</th>
+                                    <th>Current Price</th>
+                                    <th>Market Value</th>
+                                    <th>P&L</th>
+                                    <th>P&L %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positionsTableBody">
+                                <tr><td colspan="7">Loading positions...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Transaction History</h3>
+                    <div class="form-group">
+                        <select id="historyFilter">
+                            <option value="all">All Transactions</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="quarter">This Quarter</option>
+                        </select>
+                        <button class="btn" onclick="filterTransactionHistory()" style="margin-top: 10px;">🔍 Filter</button>
+                    </div>
+                    <div id="transactionHistory">
+                        <table class="detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Symbol</th>
+                                    <th>Action</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionTableBody">
+                                <tr><td colspan="6">Loading transaction history...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Portfolio Analytics</h3>
+                    <div id="portfolioAnalytics" class="data-display">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-value" id="totalReturn">--</span>
+                                <div class="stat-label">Total Return %</div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-value" id="sharpeRatio">--</span>
+                                <div class="stat-label">Sharpe Ratio</div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-value" id="beta">--</span>
+                                <div class="stat-label">Portfolio Beta</div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-value" id="maxDrawdown">--</span>
+                                <div class="stat-label">Max Drawdown</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="calculatePortfolioMetrics()" style="margin-top: 15px;">📊 Calculate Metrics</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Js -->
+     <script src="js/main.js"></script>
+</body>
+</html>
